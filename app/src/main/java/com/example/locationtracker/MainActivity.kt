@@ -34,19 +34,19 @@ class MainActivity : AppCompatActivity() {
         imageButton.setOnClickListener(){
             // get & update the shared preferences
             var sharedPreferences = getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE)
-            if(sharedPreferences.contains("ACTIVITY_IDLENESS")) {
-                locationStatus = sharedPreferences.getBoolean("ACTIVITY_IDLENESS", false)
+            if(sharedPreferences.contains("ACTIVITY_TRACKER")) {
+                locationStatus = sharedPreferences.getBoolean("ACTIVITY_TRACKER", false)
             }
             val editor = sharedPreferences.edit()
             locationStatus = !locationStatus
-            editor.putBoolean("ACTIVITY_IDLENESS", locationStatus)
+            editor.putBoolean("ACTIVITY_TRACKER", locationStatus)
             editor.commit()
 
             if(locationStatus) {
                 if (checkPermissionForLocation(this)) {
                     imageButton.setImageResource(R.drawable.stop)
                     textView.text = "Stop Location Tracker"
-                    Toast.makeText(this, "Idleness tracking activated!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Location tracker activated!", Toast.LENGTH_SHORT).show()
                     val serviceIntent = Intent(this, LocationService::class.java)
                     serviceIntent.putExtra("TRACKING_LOCATION_ACTIVITY", "Location")
                     serviceIntent.putExtra("TRACKING_LOCATION_STATUS", locationStatus)
@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         else {
                 imageButton.setImageResource(R.drawable.play)
                 textView.text = "Start Location Tracker"
-                Toast.makeText(this, "Idleness tracking deactivated!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Location tracker deactivated!", Toast.LENGTH_SHORT).show()
                 val serviceIntent = Intent(this,LocationService::class.java)
                 stopService(serviceIntent)
         }
