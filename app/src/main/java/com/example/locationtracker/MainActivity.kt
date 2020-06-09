@@ -21,6 +21,9 @@ class MainActivity : AppCompatActivity() {
     val SHARED_PREFERENCES = "Location_TRACKER_PREFERENCES"
     var locationStatus = false
     private val REQUEST_PERMISSION_LOCATION = 10
+    private var permissions: Array<String> = arrayOf(Manifest.permission.RECORD_AUDIO)
+    private val REQUEST_RECORD_AUDIO_PERMISSION = 200
+    private var permissionToRecordAccepted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +33,8 @@ class MainActivity : AppCompatActivity() {
             buildAlertMessageNoGps()
         }
         createNotificationChannel()
+        //check if we have access to record media
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION)
 
         imageButton.setOnClickListener(){
             // get & update the shared preferences
@@ -51,6 +56,11 @@ class MainActivity : AppCompatActivity() {
                     serviceIntent.putExtra("TRACKING_LOCATION_ACTIVITY", "Location")
                     serviceIntent.putExtra("TRACKING_LOCATION_STATUS", locationStatus)
                     ContextCompat.startForegroundService (this, serviceIntent)
+
+                    //call the audio recorder intent
+                    val audioserviceIntent = Intent(this, AudioService::class.java)
+                    serviceIntent.putExtra("Audio", locationStatus)
+                    ContextCompat.startForegroundService (this, audioserviceIntent)
                 }
             }
         else {
@@ -59,8 +69,24 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Location tracker deactivated!", Toast.LENGTH_SHORT).show()
                 val serviceIntent = Intent(this,LocationService::class.java)
                 stopService(serviceIntent)
+                val audioserviceIntent = Intent(this,AudioService::class.java)
+                stopService(audioserviceIntent)
         }
     }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionToRecordAccepted = if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
+            grantResults[0] == PackageManager.PERMISSION_GRANTED
+        } else {
+            false
+        }
+        if (!permissionToRecordAccepted) finish()
     }
     private fun buildAlertMessageNoGps() {
 
